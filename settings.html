@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>User Info + Nama</title>
+  <style>
+    body {
+      font-family: monospace;
+    }
+
+    .btn {
+      color: white;
+      background-color: red;
+      display: grid;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .btn:hover {
+      color: yellow;
+      background-color: green;
+      transition: 0.4s;
+    }
+
+    input {
+      padding: 8px;
+      font-size: 16px;
+      width: 250px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Public Info</h1>
+
+  <p id="status">Status: Loading...</p>
+  <p id="ip">IP Address: Loading...</p>
+
+  <label for="nama">Nama Anda (huruf saja):</label><br>
+  <input
+    type="text"
+    id="nama"
+    placeholder="Contoh: Vuman"
+    oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')"
+    required
+  ><br>
+
+  <button class="btn" onclick="kirimForm()">Confirm Untuk Selesai</button>
+
+  <script>
+    let status = navigator.onLine ? "Terhubung ke Internet" : "Offline";
+    let ipAddress = "Belum didapat";
+
+    document.getElementById("status").innerText = "Status: " + status;
+
+    // Ambil IP
+    fetch("https://api64.ipify.org?format=json")
+      .then(res => res.json())
+      .then(data => {
+        ipAddress = data.ip;
+        document.getElementById("ip").innerText = "IP Address: " + ipAddress;
+      })
+      .catch(err => {
+        document.getElementById("ip").innerText = "Gagal ambil IP";
+        console.error("Gagal ambil IP:", err);
+      });
+
+    function kirimForm() {
+      const nama = document.getElementById("nama").value.trim();
+
+      if (nama === "") {
+        alert("⚠️ Nama wajib diisi.");
+        return;
+      }
+
+      // Ganti link Formspree kamu di bawah ini
+      fetch("https://formspree.io/f/xanjrdgp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          nama: nama,
+          status: status,
+          ip: ipAddress
+        })
+      })
+      .then(res => {
+        if (res.ok) {
+          alert("✅ Data berhasil dikirim!");
+          setTimeout(() => window.close(), 1000);
+        } else {
+          alert("❌ Gagal kirim ke Formspree.");
+        }
+      })
+      .catch(err => {
+        alert("❌ Error: " + err);
+      });
+    }
+  </script>
+</body>
+</html>
